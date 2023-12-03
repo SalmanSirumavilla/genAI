@@ -1,2 +1,0 @@
-/home/sirumavills/Wonders/miscillaneous/test_gtest/build/CMakeFiles/edit_cache.dir
-/home/sirumavills/Wonders/miscillaneous/test_gtest/build/CMakeFiles/rebuild_cache.dir
