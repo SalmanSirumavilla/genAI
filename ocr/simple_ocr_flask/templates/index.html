@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Application</title>
+</head>
+<body>
+    <h1>OCR Application</h1>
+
+    <form id="imageForm">
+        <label for="file">Choose an image or paste from clipboard:</label>
+        <input type="file" name="file" id="file" accept=".png, .jpg, .jpeg">
+        <textarea id="imageData" name="imageData" placeholder="Paste image data here"></textarea>
+        <input type="submit" value="Process OCR">
+    </form>
+
+    {% if result %}
+        <h2>OCR Result:</h2>
+        <p>{{ result }}</p>
+        <img src="{{ image_path }}" alt="Uploaded Image">
+    {% endif %}
+
+    <script>
+        document.getElementById('imageForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            // Check if image data is pasted
+            var imageData = document.getElementById('imageData').value;
+            if (imageData) {
+                // Handle the image data (you might want to send it to the server for processing)
+                console.log('Image data:', imageData);
+            } else {
+                // Handle file upload (as in your original form)
+                var fileInput = document.getElementById('file');
+                var file = fileInput.files[0];
+                if (file) {
+                    var formData = new FormData();
+                    formData.append('file', file);
+
+                    // You can now use 'formData' to send the image file to the server
+                    // For example, using fetch or XMLHttpRequest
+                    console.log('File data:', formData);
+                } else {
+                    console.log('No image data or file provided.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
