@@ -1,0 +1,57 @@
+from transformers import TextStreamer
+
+from peft import AutoPeftModelForCausalLM
+from transformers import AutoTokenizer
+
+peft_model_dir = "peft-dialogue-summary"
+
+# load base LLM model and tokenizer
+trained_model = AutoPeftModelForCausalLM.from_pretrained(
+    peft_model_dir,
+    low_cpu_mem_usage=True,
+    torch_dtype=torch.float16,
+    load_in_4bit=True,
+)
+tokenizer = AutoTokenizer.from_pretrained(peft_model_dir)
+
+index = 0
+
+dialogue = dataset['test'][index]['dialogue']
+summary = dataset['test'][index]['summary']
+
+prompt = f"""
+Summarize the following conversation.
+
+### Input:
+{dialogue}
+
+### Summary:
+"""
+
+input_ids = tokenizer(prompt, return_tensors='pt',truncation=True).input_ids.cuda()
+outputs = trained_model.generate(input_ids=input_ids, max_new_tokens=100, )
+output= tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
+
+dash_line = '-'.join('' for x in range(100))
+print(dash_line)
+print(f'INPUT PROMPT:\n{prompt}')
+print(dash_line)
+print(f'BASELINE HUMAN SUMMARY:\n{summary}\n')
+print(dash_line)
+print(f'TRAINED MODEL GENERATED TEXT :\n{output}')
+
+trained_model = AutoPeftModelForCausalLM.from_pretrained(
+    peft_model_dir,
+    low_cpu_mem_usage=True,
+    torch_dtype=torch.float16,
+)
+# Merge LoRA and base model
+merged_model = trained_model.merge_and_unload()
+
+# Save the merged model
+merged_model.save_pretrained("merged_model",safe_serialization=True)
+tokenizer.save_pretrained("merged_model")
+
+# push merged model to the hub
+# merged_model.push_to_hub("user/repo")
+# tokenizer.push_to_hub("user/repo")
